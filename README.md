@@ -1,4 +1,4 @@
 ![Juego de BlackJack con Javascript]
 
-(https://raw.githubusercontent.com/Roberds/BlackJack-JS/blob/8479e51aed9ef3dc5d8dce9e8e77f8b4aa5ac816/assets/img/juego.jpg)
+https://github.com/Roberds/BlackJack-JS/blob/883cc9973ddc36e51e2cef17b1e4940f0cbe3750/assets/img/juego.jpg
 
