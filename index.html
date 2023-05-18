@@ -16,15 +16,15 @@
     <div class="row mt-3 container-fluid">
         <div class="col text-center">
             <button id="btnNuevo" class="btn btn-danger ">Nuevo juego</button>
-            <button id="btnPedir" class="btn btn-success">Pedir carta</button>
-            <button id="btnDetener" class="btn btn-success">No va más</button>
+            <button id="btnPedir" disabled="disabled" class="btn btn-success">Pedir carta</button>
+            <button id="btnDetener" disabled="disabled" class="btn btn-success">No va más</button>
         </div>
     </div>
 
     <!--Apuesta-->
     <div class="row mt-3 container-fluid">
         <div class="col text-center">
-            <h3>Apuesta <small>0</small>€</h3>
+            <h3>Apuesta <span>0</span>€</h3>
         </div>
     </div>
 
@@ -32,8 +32,8 @@
     <!--Jugador-->
     <div class="row mt-3 container">
         <div class="col">
-            <h1>Jugador 1 - <small>0</small> puntos - <small>0</small>€</h1>
-            <div id="jugador-cartas">
+            <h1>Jugador 1 - <small>0</small> puntos - <span>0</span>€</h1>
+            <div id="jugador-cartas" class="divCartas">
                 <!-- <img class="carta" src="assets/cartas/2C.png" alt=""> -->
             </div>
         </div>
@@ -54,13 +54,13 @@
     <div class="row mt-3 container">
         <div class="col">
             <h1>Computadora - <small>0</small> puntos</h1>
-            <div id="computadora-cartas">
+            <div id="computadora-cartas" class="divCartas">
                 <!-- <img class="carta" src="assets/cartas/4C.png" alt=""> -->
             </div>
         </div>
     </div>
 
     <script src="assets/js/underscore-min.js"></script>
-    <script src="assets/js/juego.js"></script>
+    <script src="assets/js/juego-min.js"></script>
 </body>
 </html>

@@ -11,35 +11,61 @@
     'use strict'
 
     let deck = [];
-    const tipos = ['C', 'D', 'H', 'S'];
-    const especiales = ['A', 'J', 'Q', 'K']
+    const tipos = ['C', 'D', 'H', 'S'],
+          especiales = ['A', 'J', 'Q', 'K']
 
-    let puntosJugador = 0; //puntosHTML[1]
-    let puntosComputadora = 0; //puntosHTML[3]
-    let dinero = 10; //puntosHTML[2]
+    // let puntosJugador = 0, //puntosHTML[1]
+    //     puntosComputadora = 0, //puntosHTML[3]
+    let puntosJugadores = [];
+    let apuesta = 0; //apuestaDinero[0]
+    let dinero = 10; //apuestaDinero[1]
 
 
     //Referencias HTML
-    const btnPedir = document.querySelector('#btnPedir');
-    const btnDetener = document.querySelector('#btnDetener');
-    const btnNuevo = document.querySelector('#btnNuevo');
+    const btnPedir = document.querySelector('#btnPedir'),
+          btnDetener = document.querySelector('#btnDetener'),
+          btnNuevo = document.querySelector('#btnNuevo');
 
     //Fichas
-    let apuesta = 0; //puntosHTML[0]
-    const uno = document.querySelector('#uno');
-    const cinco = document.querySelector('#cinco');
-    const diez = document.querySelector('#diez');
+    const uno = document.querySelector('#uno'),
+          cinco = document.querySelector('#cinco'),
+          diez = document.querySelector('#diez');
 
-    const puntosHTML = document.querySelectorAll('small');
-    const divCartasJugador = document.querySelector('#jugador-cartas');
-    const divCartasComputadora = document.querySelector('#computadora-cartas');
-
+    const puntosHTML = document.querySelectorAll('small'),
+          divCartasJugadores = document.querySelectorAll('.divCartas'),
+          apuestaDinero = document.querySelectorAll('span');
 
     //Inciiamos dinero:
-    puntosHTML[2].innerText = dinero;
+    apuestaDinero[1].innerText = dinero;
+
+
+    //Función para inciar el juego
+    const iniciaJuego = ( numJugadores = 2) => {
+         deck = crearDeck();
+         
+         puntosJugadores = [];
+         for ( let i = 0; i < numJugadores; i++ ){
+            puntosJugadores.push(0);
+         }
+
+        apuesta = 0;
+
+        puntosHTML.forEach( elem => elem.innerText = 0 );
+        // puntosHTML[0].innerText = 0;
+        // puntosHTML[1].innerText = 0;
+        apuestaDinero[0].innerText = 0;
+
+        divCartasJugadores.forEach( elem => elem.innerHTML = "" )
+
+        btnPedir.disabled = false;
+        btnDetener.disabled = false;
+
+    }
 
     //Funcion para crear baraja
     const crearDeck = () => {
+        
+        deck = [];
 
         for (let i = 2; i <= 10;  i++) {
             for(let tipo of tipos){
@@ -53,13 +79,10 @@
             }
         }
 
-
         //Mezclar bajara (impostamos libreria underscore)
-        deck = _.shuffle(deck);
-        return deck;
+        return _.shuffle(deck);
     }
 
-    crearDeck();
 
     //Funcion para devolver una cara y sacarla de la baraja
     const pedirCarta = () => {
@@ -68,8 +91,8 @@
             throw 'No hay más cartas en la baraja'
         }
 
-        const carta = deck.pop();
-        return carta
+        //retorna la carta
+        return deck.pop();
     }
 
 
@@ -85,40 +108,39 @@
                 : valor * 1;
     }
 
-    //Turno de la compuradora
-    const turnoComputadora = ( puntuacionMinima ) => {
+    //Turno: 0 = primer jugador, y el ultimo computadora.
+    const acumularPuntos = ( carta, turno ) => {
 
-        do {
-            const carta = pedirCarta();
-            puntosComputadora = puntosComputadora + valorCarta(carta);
-        
-            puntosHTML[3].innerText = puntosComputadora
-        
-        
-            //<!-- <img class="carta" src="assets/cartas/2C.png" alt=""> -->
+        puntosJugadores[turno] = puntosJugadores[turno] + valorCarta(carta);
+        puntosHTML[turno].innerText = puntosJugadores[turno];
+        return puntosJugadores[turno];
+
+    }
+
+    const crearCarta = ( carta, turno) => {
+         //<!-- <img class="carta" src="assets/cartas/2C.png" alt=""> -->
             const imgCarta = document.createElement('img');
             imgCarta.src = `assets/cartas/${carta}.png`;
             imgCarta.classList.add('carta');
-            divCartasComputadora.append(imgCarta);
+            divCartasJugadores[turno].append( imgCarta );
+    }
 
-            if ( puntuacionMinima > 21){
-                break;
-            }
+    const ganador =  () => {
 
-        } while( (puntosComputadora < puntuacionMinima) && ( puntuacionMinima <= 21) );
+        const [ puntuacionMinima, puntosComputadora ] = puntosJugadores;
 
-        //Mensaje de victoria
-        setTimeout (() => {
+         //Mensaje de victoria
+         setTimeout (() => {
             if ( puntosComputadora === puntuacionMinima ){
                 alert('Nadie gana :(')
                 dinero = dinero + apuesta;
-                puntosHTML[2].innerText = dinero;
+                apuestaDinero[1].innerText = dinero;
             }else if ( ( puntuacionMinima > 21 ) ){
                 alert('¡Perdiste!, gana la máquina')
             }else if ( puntosComputadora > 21 ){
                 alert('¡Ganaste!')
                 dinero = dinero + apuesta * 2;
-                puntosHTML[2].innerText = dinero;
+                apuestaDinero[1].innerText = dinero;
                 
             }else {
                 alert('¡Perdiste!, gana la máquina')
@@ -127,23 +149,37 @@
     }
 
 
+    //Turno de la compuradora
+    const turnoComputadora = ( puntuacionMinima ) => {
+        
+        let puntosComputadora = 0;
+
+        do {
+
+            const carta = pedirCarta();
+            puntosComputadora = acumularPuntos( carta, puntosJugadores.length - 1 );
+            crearCarta( carta, puntosJugadores.length - 1 );
+        
+
+            if ( puntuacionMinima > 21){
+                break;
+            }
+
+        } while( (puntosComputadora < puntuacionMinima) && ( puntuacionMinima <= 21) );
+
+        ganador()
+       
+    }
+
+
     //Eventos
 
     btnPedir.addEventListener('click', () => {
 
+        
         const carta = pedirCarta();
-
-        puntosJugador = puntosJugador + valorCarta(carta);
-
-        puntosHTML[1].innerText = puntosJugador
-
-
-        //<!-- <img class="carta" src="assets/cartas/2C.png" alt=""> -->
-        const imgCarta = document.createElement('img');
-        imgCarta.src = `assets/cartas/${carta}.png`;
-        imgCarta.classList.add('carta');
-        divCartasJugador.append(imgCarta);
-
+        const puntosJugador =  acumularPuntos( carta, 0 );
+        crearCarta( carta, 0 );
 
         //Validación de puntos
         if ( puntosJugador > 21 ) {
@@ -163,28 +199,14 @@
         btnPedir.disabled = true;
         btnDetener.disabled = true;
         
-        turnoComputadora( puntosJugador );
+        turnoComputadora( puntosJugadores[0] );
     })
 
 
     btnNuevo.addEventListener('click', () => {
 
-        console.clear();
-        deck = [];
-        deck = crearDeck();
+        iniciaJuego();
 
-        puntosJugador = 0;
-        puntosComputadora = 0;
-        apuesta = 0;
-        puntosHTML[1].innerText = 0;
-        puntosHTML[3].innerText = 0;
-        puntosHTML[0].innerText = 0;
-
-        divCartasComputadora.innerHTML = '';
-        divCartasJugador.innerHTML = '';
-
-        btnPedir.disabled = false;
-        btnDetener.disabled = false;
     })
 
 
@@ -192,9 +214,9 @@
     uno.addEventListener('click', () => {
         if ( dinero > 0 ){
             apuesta = apuesta + 1
-            puntosHTML[0].innerText = apuesta
+            apuestaDinero[0].innerText = apuesta
             dinero = dinero - 1;
-            puntosHTML[2].innerText = dinero
+            apuestaDinero[1].innerText = dinero
         }else {
             alert( 'No tienes dinero suficiente ')
         }
@@ -203,9 +225,9 @@
     cinco.addEventListener('click', () => {
         if ( dinero > 0 ){
             apuesta = apuesta + 5
-            puntosHTML[0].innerText = apuesta;
+            apuestaDinero[0].innerText = apuesta;
             dinero = dinero - 5;
-            puntosHTML[2].innerText = dinero;
+            apuestaDinero[1].innerText = dinero;
         }else {
             alert( 'No tienes dinero suficiente ');
         }
@@ -214,14 +236,18 @@
     diez.addEventListener('click', () => {
         if ( dinero > 0 ){
             apuesta = apuesta + 10
-            puntosHTML[0].innerText = apuesta
+            apuestaDinero[0].innerText = apuesta
             dinero = dinero - 10;
-            puntosHTML[2].innerText = dinero
+            apuestaDinero[1].innerText = dinero
         }else {
             alert( 'No tienes dinero suficiente ')
         }
     });
 
+    //Para hacer publica esta funcioón( habira que dar un nombre a la funcion anonima autoinvocada para acceder desde archivos externos)
+    return {
+       nuevoJuego: iniciaJuego
+    };
 
  })()
 
